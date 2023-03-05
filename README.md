@@ -1,6 +1,6 @@
-# How to build a Requests app using Tailwind and Celo
+# How To Build a Requests app using Tailwind and Celo
 
-# Table of Contents
+## Table of Contents
 - Introduction
 - Prerequisite
 - Requirement
@@ -10,77 +10,82 @@
 - Conclusion
 
 
-# Introduction
-Hi guys, let's build a Requests application that runs on the blockchain. You can use this application to request for money from your loved ones, or family, or even friends.
+## Introduction
+Let's build a requests application that runs on the Celo blockchain. This application enables users request money from your loved ones, or family, or even friends.
 
-One good thing about the application is that anybody who you are sending request to don't have to be registered in the app. Once they open the applicaion, they will immediately see your request, and with the click of a button, voila! your request will be granted.
+One good thing about this application is that users that sends request don't have to register in this app. Once users open the applicaion, they will see requests made to them, and with the click of a button, voila! requests will be granted.
 
-Follow me through this amazing journey as we learn how to write smart contracts with Solidity, deploying the smart contracts to the Celo blockchain using Remix IDE, building a frontend for our application using React and Tailwind CSS, and a lots more, all from building this one app.
+Follow me through this amazing journey as we learn how to:
+- Write smart contracts using Solidity.
+- Deploying the smart contracts to the Celo blockchain using [Remix IDE](https://remix.ethereum.org/)
+- Building a frontend for our application using React and Tailwind CSS
 
 # Prerequisite
 To graps the concepts and technologies used in the tutorial, you need the following:
-- Knowledge of writing smart contracts with Solidity
-- Knowledge of writing programs with JavaScript
+- Knowledge of writing smart contracts with [Solidity](https://docs.soliditylang.org/#:~:text=Solidity%20is%20an%20object%2Doriented,Ethereum%20Virtual%20Machine%20(EVM).)
+- Knowledge of writing programs with [JavaScript](https://www.w3schools.com/js/)
 - Knowledge of working with JavaScript frameworks such as React
-- Knowledge of using code editors like VSCode
+- Knowledge of using code editors like [VSCode](https://code.visualstudio.com/download)
 - Be open to gaining new knowledge
 
 ## Requirement
 In order to follow this tutoiral seamlessly, you need the following:
-- [VSCode]()
-- [Chrome]() or [Brave]() browser
-- [Celo Extension Wallet]()
-- [React]()
-- [Tailwind]()
-- [NodeJS]()
+- [VSCode](https://code.visualstudio.com/)
+- A web brower e.g [Chrome](https://www.google.com/aclk?sa=l&ai=DChcSEwiataz_rcP9AhVEjGgJHbbgDpkYABABGgJ3Zg&sig=AOD64_0uLRPrbyJHi1W8VQqKjtwru7B_LQ&adurl&ved=2ahUKEwjpp6b_rcP9AhWwSfEDHRZiDhoQqyQoAHoECAoQBQ) or [Brave](https://brave.com/download/) browser
+- [Celo Extension Wallet](https://chrome.google.com/webstore/detail/celoextensionwallet/kkilomkmpmkbdnfelcpgckmpcaemjcdh?hl=en)
+- [React](https://reactjs.org/)
+- [Tailwind](https://v2.tailwindcss.com/docs)
+- [NodeJS](https://nodejs.org/)
+- [ Celo Extension wallet](https://chrome.google.com/webstore/detail/celoextensionwallet/kkilomkmpmkbdnfelcpgckmpcaemjcdh?hl=en)
 
 # React App Development
-The first step we will take in building this amazing app is building the frontend user interface for the app. We will be using react and tailwind CSS for the frontend development. 
+The first step we will take in building this amazing app is building the frontend or user interface of the app. We will use react and tailwind CSS for the frontend development.
 
-Create a new directory and give it a name of your choice.
-Open the newly created directory inside a code editor.
-Open the directory in an terminal and run the command
+Follow the steps below to create a directory for the frontend:
+1. Create a new directory and give it a name of your choice.
+2. Open the newly created directory inside a code editor.
+3. Open the directory in an terminal and run the command
+
 ```bash
 npx create-react-app .
 ```
-The command above will create a react application boilder plate inside the current directory. A react boiler plate contains the following files:
+The command above will create a react application boilerplate inside the current directory. A react boiler plate looks like the image below:
 
 [[Plug an image of React folder structure from vscode here]()]
 
 The next thing to do is to add tailwind to your react application. There are two ways of doing this:
-1. Add tailwing to the installed packages by installing it from the command line
-2. Use tailwind cdn by adding the cdn link at the top of your html file. CDN stands for Content Delivery Network
+1. Add tailwind by [installation](https://nodejs.org/) from the command line.
+2. Use tailwind by adding the CDN link at the top of your html file. CDN(Content Delivery Network).
 
-We will go for the second option (using the CDN) because it's faster and easier to use.
+We will go for the second option, using the CDN because it's faster and easier to use.
 
-To use tailwind cdn, follow the steps below:
+To use tailwind CDN, follow the steps below:
 1. Navigate to your `/public` folder in the boilerplate we created
 2. Open the `index.html` file and locate the meta tags in the heading.
-3. Add the following line anywhere inside the `head` tag:
+3. Add the code below inside the `head` tag:
 ```html
     <script src="https://cdn.tailwindcss.com"></script>
 ```
-4.Optionally, you can update the content of your title tag to anything of your choice. In our case, we changed it from React App to Requests App.
+4.Optionally, you can update the content of the title tag to anything of your choice. In our case, we changed it from React App to Requests App.
 
-And that's it. You have successfully added Tailwind to your React Application.
+You have successfully added Tailwind to your React Application.
 
 We will now continue with building the frontend.
 
-j
 
-Chances are high that if ou installed the react app using the command line, you are most likely installed the latest version of react (version 18). Unfortunately, some packages we will be using for this tutorial won't be compatible with version 18 so we wll be downgrad it lower version. Open the terminal again and run teh command:
+Chances are high that if you installed the react app using the command line, you will most likely install the latest version of react (version 18). Unfortunately, some packages we will use for this tutorial won't be compatible with version 18, so we wll be downgrade react to a lower version. Open the terminal  and run the command be;ow:
 
 ```bash
 npm uninstall react react-dom react-scripts
 ```
-The command will removed the versions of react we installed earlier an dgive room for us to instal new version of react.
+The command above will remove the react version we installed earlier and allow us to install another version of react.
 
 ```bash
 npm install react@17.0.2 react-dom@17.0.2 react-scripts@4.0.1
 ```
-The comand we wrote above will install the versions of react that is compativle with the packages will insetall next.
+The comamnd above installs the version of react that is compativle with the packages we will install.
 
-The next package to install is the Celo contractkit package. Run the following command to iistall it in our react project:
+The next package to install is the Celo contractkit package. Run the following command to install it in our react project:
 
 ```bash
 npm install web3 @celo/contractkit
@@ -90,13 +95,13 @@ also install `bignumber.js` to handle large numbers on the blockchain.
 npm install bignumber.js
 ```
 
-Aftr everything is done installing, run the command to start up your local server:
+After complete installation, run the command below to start up your local server:
 ```bash
 npm start
 ```
-It will open a new window in your browser with your web page ready to be updated.
+It will open a new window in your browser, which display your web page. It also allow automatic update of our app.
 
-Open your App.js file and replace the boilerplate code inside with this:
+Open the App.js file and replace the boilerplate code inside with this:
 
 ```javascript
 import React, { useState, useEffect } from 'react'
@@ -273,15 +278,18 @@ export default App
 
 Follow along as we break down the code into simple and understandable snippets.
 
-We started by importing some of the packages we installed earlier to b eused inside this file. Some of them includes `Web3`, `BigNumber`, `newKitFromWeb3` etc.
+We started by importing some of the packages we installed earlier. Some of them includes:
+- `Web3`
+-`BigNumber`
+- `newKitFromWeb3` 
 
-We also created two variables that are very important to our application which are `cusdContractAddress` and `requestsContractAddress`.
+We also created two variables that are very important in our application which are `cusdContractAddress` and `requestsContractAddress`.
 
-We then created a react app component called `App`. You can give your component any name of your choice, but we will just call ours because it tallies with the file name (by convention, components name are supposed to be the same as the file name).
+We then created a react app component called **App**. You can give your component any name of your choice, but we will just call ours App because it tallies with the file name (by convention, components name are supposed to be the same as the file name).
 
-Inside the app component, we created some some state objects using `useState` provided by React. `useState` is React Hook that allows you to add state to a functional component. It returns an array with two values: the current state and a function to update it. The Hook takes an initial state value as an argument and returns an updated state value whenever the setter function is called.
+Inside the app component, we created some some state objects using `useState` provided by React. `useState` is a [React Hook](https://reactjs.org/docs/hooks-intro.html) that allow you to add state to a functional component. It returns an array with two values: the current state and a function to update it. The Hook takes an initial state value as an argument and returns an updated state value whenever the setter function is called.
 
-The usestate objects created in our app will be used to store some important states and variables in our application.
+The `useState `objects created in our app will be used to store some important states and variables in our application.
 
 ```javascript
   async function connectWallet() {
@@ -303,7 +311,7 @@ The usestate objects created in our app will be used to store some important sta
     }
   }
 ```
-We then created our first function and name it `connectWallet`. This function will be responsible for connecting our react application to the celo blockchain using the Celo Extension wallet installed in our browser. It also uses the Web3 library to make this connection possible. After everything is done, it saves them into the `kit` and `address` variable using their respective setter function which are `serKit` and `setAddress`.
+We then created our first function and name it `connectWallet`. This function will connect our react application to the Celo blockchain using the Celo Extension wallet installed in our browser. It utilizes the Web3 library to make this connection possible. After everything is done, it saves them into the `kit` and `address` variable using their respective setter function which are `setKit` and `setAddress`.
 
 ```javascript
   async function connectContract() {
@@ -316,9 +324,9 @@ We then created our first function and name it `connectWallet`. This function wi
   }
 ```
 
-The next function we created is connctContract function. This function will be responsible for connecting our contract using the contract deployed address and teh ABI generated from the contract (we will discuss about coutractadddress, abi, etc leter). The function then saves the contract in our state object called `requestsContrac`t using the setter funciton called `setRequestContract`.
+The next function we created is connctContract function. This function will be responsible for connecting our contract using the contract deployed address and the ABI generated from the contract (we will discuss about coutractadddress, abi, etc later). The connctContract function then saves the contract in our state object called `requestsContrac`t using the setter funciton called `setRequestContract`.
 
-The next series of functions we will be adding will be functions that adds functionalities to our dapp. The first one is `sendRequest` function. Below is the code fur the function:
+The next series of functions we will be adding will be functions that adds functionalities to our dapp. The first one is `sendRequest` function. Below is the code for the function:
 
 ```javascript
   async function sendRequest() {
@@ -329,9 +337,9 @@ The next series of functions we will be adding will be functions that adds funct
     }
   }
 ```
-We made the function asyncronous by using the work `async` in front of the function. `async` means that we can use `await` inside the function.and when you use await, it means that you want to want for that particular expression fo complete execution before moving to the next expression. The function use the contract object we crated above to call the `makeRequest` method from the contracr and pass the necessary variables. 
+We made the function asyncronous by using the work `async` in front of the function. `async` means that we can use `await` inside the function.and when you use await, it waits for that particular request to complete its execution before moving to the next expression. The function use the contract object we created above to call the `makeRequest` method from the contract and pass the necessary variables. 
 
-The next functio is get incoming request.
+The next function is gets incoming request.
 ```javascript
   async function getIncomingRequest() {
     try {
@@ -353,9 +361,9 @@ The next functio is get incoming request.
     }
   }
 ```
-get incoming request is responsible for fetching all the incoming requests from the contract. These are requests that are sent to this user. The function calls the loadIncomingREquest from the funcition and uses a promise to collect the data object gotten from contract. At the end of the day, it then return the data and store it inside `incomingRequests` variable.
+The `getIncomingRequest` function fetches all the incoming requests from the contract. These are requests that are sent to this user. The function calls the `loadIncomingRequest` from the function and uses a promise to collect the data object gotten from contract. it then return the data and store it inside `incomingRequests` variable.
 
-The next function is get outgoing request:
+The next function gets outgoing request:
 
 ```javascript
   async function getOutgoingRequests() {
@@ -378,9 +386,11 @@ The next function is get outgoing request:
     }
   }
 ```
-get outgoing request is responsible for fetching all the requests sent to this user an sstoring it to the `outGoingRequests` variable. 
+get outgoing request is fetchs all the requests sent to this user, them stores it in the `outGoingRequests` variable. 
 
-the last two functions we create are 
+the last two functions we create are: 
+- approveRequestAmount
+- grantRequest
 
 ```javascript
   async function approveRequestAmount(amount) {    
@@ -404,18 +414,18 @@ the last two functions we create are
   }
 ```
 
-approveRequestAmount() approves the our requests contract to spend the specific amount of cUSD from ouraccount using the erc20 approve method. It first gets the cusd contract before calling the approve method from it.
+`approveRequestAmount()` approves the requests contract to spend the specific amount of cUSD from our account using the erc20 approve method. It first gets the cUSD contract before calling the approve method from it.
 
-grantRequest() completes a request that was sent to this user. It first of all calls the approveRequest function to approve the amount to be granted, before calling our request scontract to transfer the amount from this user's accout balance to the user making the request.
+grantRequest() completes a request that was sent to this user. It first call the `approveRequest` function to approve the amount to be granted, before calling our request scontract to transfer the amount from this user's account balance to the user making the request.
 
-Additionally, we added some use effect hook to update the the variables in the use state objects we created in the app componnent. use effect is similar to use state but the difference is that is is used to make dom updates when ever somehting happens in our app.
+Additionally, we added some useEffect hook to update the the variables in the use state objects we created in the app componnent. useEffect is similar to useState but the difference is that is is used to make DOM(Document Object Model) updates, whenever there is a change in our app.
 
-In the last part of our app, we returned the user interface code that will be displayed when the user visits our app. We used tailwing to make it look better and add the functionalities to it by adding integerating the functions we just created above. There is nothing much in the page, it's just basic html with class names that contained tailwind styles. 
+In the last part of our app, we returned the user interface code, which displays when the user visits our app. We used tailwind to make it look better and add the functionalities to it by integerating the functions we just created above. There is nothing much in the page, it's just basic html with class names that containes tailwind styles. 
 
 Visit the [Tailwind documentation site](https://tailwindcss.com/docs/installation) to learn how to user tailwind if you are new to using it.
 
 ## The Smart Contract
-As stated earlier, we will use Solidity smart contract for write our smart contract. Let me show you the finished code before breaking it down into smaller snippets:
+As stated earlier, we will use Solidity to write our smart contract. Be;pw is the complete code before breaking it down into smaller snippets:
 
 ```
 // SPDX-License-Identifier: MIT
@@ -544,9 +554,9 @@ interface IERC20Token {
 }
 ```
 
-First of all, we declared the license to use for our solidity code which is the MIT license. We then declared the solidity compiler version to be used for our code which is 0.8.7.
+First of all, we declared the license to use for our solidity code which is the MIT license. We then declared the Solidity compiler version to be used for our code which is 0.8.7.
 
-The next step we create an interface to be used for accessing our cUSD token on the Celo blockchain. We will be making use of the `transferFrom` method of this interface to transfer cusd tokens between usrs of our application.
+The next step we create an interface to be used for accessing our cUSD token on the Celo blockchain. We used the `transferFrom` method of this interface to transfer cUSD tokens between users of our application.
 
 After the interface, we create the body of our contract which is as below:
 
@@ -575,8 +585,8 @@ This is the point where we write the code for our contract body.
     event CompleteRequestEvent(uint256 requestId);
 ```
 
-Inside the contract body, we created a struct and we call it `Request`. This struct will store all teh data related to a requst made by a user.
-We then created a mapping and called it `requests`. This mapping will store allthe requests ever created. The next variable is `requrestTracker` which tracks the number of requests that have been made. One last variable is `cusdAddress` this variable stores the address of cusd contract on the Celo Alfajores testnet. If yo plan to build an app for celo mainnet, check the [celo docs](https://docs.celo.org) for the mainnet address. The events we created are emitted when a request is made and a request is completed.
+Inside the contract body, we created a struct and we named it `Request`. This struct will store all the data related to a requst made by a user.
+We then created a mapping and called it `requests`. This mapping will store all the requests ever created. The next variable is `requrestTracker` which tracks the number of requests that have been made. One last variable is `cusdAddress` this variable stores the address of cusd contract on the Celo Alfajores testnet. If you plan to build an app for celo mainnet, check the [celo docs](https://docs.celo.org) for the mainnet address. The events we created are emitted when a request is made and a request is completed.
 
 We will start defining the functions in our contract below:
 
@@ -594,7 +604,7 @@ We will start defining the functions in our contract below:
         emit MakeRequestEvent(msg.sender, _to, _amount);
     }
 ```
-Make request function above creats a new request object is got from its parameters. It sets' the `to` and `amount` value of the request from its input and sets the rest values to their default value. It then imcrememnts the requests tracker by 1 and then emit the Make requst event.
+The `makerRequest` function above creates a new request object gotten from its parameters. It sets' the `to` and `amount` value of the request from its input and sets the rest pf thr values to their default value. It then imcrememnts the requests tracker by 1 and then emit the `MakeREequstevent`.
 
 ```
    // Complete an existing request
@@ -613,7 +623,7 @@ Make request function above creats a new request object is got from its paramete
         emit CompleteRequestEvent(_requestId);
     }
 ```
-Complete requests function completes the request sent by a user by sending the amount of tokens specified in the request and updating the request state, then emitting an event to indicate the request is completed. the function validates input, then send tokens using the ierc20 token interface we created earlier to to connect to the cusd contract using the address variable we created earlier. It throws an error if the transfer did not go through.
+The `completeRequests` function completes the request sent by a user by sending the amount of tokens specified in the request and updating the request state, then emitting an event to indicate the request is completed. the function validates input, then send tokens using the ierc20 token interface we created earlier to to connect to the cUSD contract using the address variable we created earlier. It throws an error if the transfer did not go through.
 
 ```
     // Load incoming requests from smart contract
@@ -637,7 +647,7 @@ Complete requests function completes the request sent by a user by sending the a
         return _requests;
     }
 ```
-loadincoming request helps us to fetch all the requests that has been sent to the current user using the app. If first uses for loop to get how many request has been sent to this user and then creates a static array of that length. It then fills the array with the reqursts.
+The loadIncomingRequest function fetches all the requests that has been sent to the current user using the app. If uses for loop to get how many request has been sent to this user and then creates a static array of that length. It then fills the array with the requests.
 
 ```
     // Load outgoing requests from smart contract
@@ -662,21 +672,21 @@ loadincoming request helps us to fetch all the requests that has been sent to th
     }
 ```
 
-load outgoing requests helps us to fetch all the the requests that has been sent from this user to other users. If first loops through to get teh number of requests, then create a static length array to store this requests before returning them.
+The `loadOutgoingRequests helps us to fetch all the the requests that has been sent from this user to other users. If first loops through to get the number of requests, then create a static length array to store this requests before returning them.
 
-## Deploying smart contract to Celo
+## Deploying Smart Contract to Celo
 After completing the smart contract, what is left is to deploy this smart contract to Celo. We will archive this using Remix IDE and Celo Extenson Wallet. Follow the steps below.
 
-1. Open remix in browser using this [link](https://remix.ethereum.org)
-2. Crate a new file and paste the code from above into the file
+1. Open Remix in browser using this [link](https://remix.ethereum.org)
+2. Create a new file and paste the code from above into the file
 3. Save annd compile the code
-4. Download Celo Extenson wallet inyour browser
+4. Download Celo Extenson wallet in your browser
 5. Download the Celo plugin in remix
 6. Click on the Deploy button to deploy your contract to Celo
 7. Copy the address and paste it in `requestsContract` variable inside `App.js` file
 
 # Conclusion
-Now that you have a deployed contract iisntance, go to your terminal and run the command 
+Now that you have a deployed contract, go to your terminal and run the command 
 ```bash
 npm start
 ```
