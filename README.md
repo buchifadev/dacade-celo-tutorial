@@ -1,4 +1,4 @@
-# How To Build a Requests app using Tailwind and Celo
+# How To Build a Requests App Using Tailwind and Celo
 
 ## Table of Contents
 - Introduction
@@ -685,7 +685,7 @@ After completing the smart contract, what is left is to deploy this smart contra
 6. Click on the Deploy button to deploy your contract to Celo
 7. Copy the address and paste it in `requestsContract` variable inside `App.js` file
 
-# Conclusion
+## Conclusion
 Now that you have a deployed contract, go to your terminal and run the command 
 ```bash
 npm start
