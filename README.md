@@ -1,13 +1,15 @@
-# How to build a Requests app using Tailwind and Celo
+# How to Build a Requests App Using Tailwind and Celo
 
-# Table of Contents
-- Introduction
-- Prerequisite
-- Requirement
-- React App Development
-- The smart contract
-- Deploying smart to Celo
-- Conclusion
+## Table of Content
+- [How to Build a Requests App Using Tailwind and Celo](#how-to-build-a-requests-app-using-tailwind-and-celo)
+  - [Table of Content](#table-of-content)
+- [Introduction](#introduction)
+- [Prerequisite](#prerequisite)
+  - [Requirement](#requirement)
+- [React App Development](#react-app-development)
+  - [The Smart Contract](#the-smart-contract)
+  - [Deploying smart contract to Celo](#deploying-smart-contract-to-celo)
+- [Conclusion](#conclusion)
 
 
 # Introduction
