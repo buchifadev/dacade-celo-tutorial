@@ -343,10 +343,10 @@ import BigNumber from "bignumber.js";
 import Web3 from 'web3';
 import erc20ABI from "./contracts/erc20.abi.json"
 import requestsABI from "./contracts/requests.abi.json"
-// paste the address you saved from the previous section after deploying
-// the smart contract into the requestsContractAddress variable
+// replace with the saved contract address here
 const requestsContractAddress = "";
 const cUsdContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
+const ERC20_DECIMALS = 18;
 
 const App = () => {
   const [kit, setKit] = useState("")
@@ -386,68 +386,72 @@ const App = () => {
   }
 
   async function sendRequest() {
+    const oneCusd = new BigNumber("1").shiftedBy(ERC20_DECIMALS).toString();
     try {
+      if(requestReceiver == kit.defaultAccount || requestReceiver == "0x0000000000000000000000000000000000000000"){
+        alert("Invalid receiver address");
+        return;
+      }
+      if(!new BigNumber(requestAmount).isGreaterThanOrEqualTo(oneCusd)){
+        alert("Request amount needs to be at least One cUSD");
+        return;
+      }
       await requestsContract.methods.makeRequest(requestReceiver, requestAmount).send({ from: kit.defaultAccount })
+      fetchRequests()
     } catch (error) {
       console.log(error)
     }
   }
 
-  async function getIncomingRequest() {
-    try {
-      const requests = await requestsContract.methods.loadIncomingRequests().call({ from: kit.defaultAccount })
-      const incomingRequests = await Promise.all(
-        requests.map(request => {
-          return {
-            id: request.requestId,
-            from: request.from,
-            to: request.to,
-            amount: request.amount,
-            completed: request.completed
-          }
+  async function fetchRequests(){
+    try{
+      const _requestsTracker = await requestsContract.methods.requestsTracker().call();
+      const _incomingRequests = [];
+      const _outgoingRequests = [];
+      let _requests = [];
+      for(let i = 0; i < Number(_requestsTracker); i++){
+        const _request = new Promise(async (resolve, reject) => {
+          const r = await requestsContract.methods.getRequest(i).call();
+          resolve({
+            id: r[0],
+            from: r[1],
+            to: r[2],
+            amount: new BigNumber(r[3]),
+            completed: r[4]
+          })
         })
-      );
-      setIncomingRequests(incomingRequests)
-    } catch (error) {
-      console.log(error)
+        _requests.push(_request);
+      }
+      _requests = await Promise.all(_requests);
+      _requests.forEach((r) => {
+        if(r.to == kit.defaultAccount){
+          _incomingRequests.push(r)
+        }else if(r.from == kit.defaultAccount){
+          _outgoingRequests.push(r)
+        }
+      })
+      setOutgoingRequests(_outgoingRequests);
+      setIncomingRequests(_incomingRequests);
+    }catch(e) {
+      console.log(e)
     }
   }
 
-  async function getOutgoingRequests() {
-    try {
-      const requests = await requestsContract.methods.loadOutgoingRequests().call({ from: kit.defaultAccount })
-      const outgoingRequests = await Promise.all(
-        requests.map(request => {
-          return {
-            id: request.requestId,
-            from: request.from,
-            to: request.to,
-            amount: request.amount,
-            completed: request.completed
-          }
-        })
-      );
-      setOutgoingRequests(outgoingRequests)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  async function approveRequestAmount(amount) {    
-    const requestAmount = new BigNumber(amount).shiftedBy(18)
+  async function approveRequestAmount(amount) {  
     const cusdContract = new kit.web3.eth.Contract(
       erc20ABI,
       cUsdContractAddress
     );
     await cusdContract.methods
-      .approve(requestsContractAddress, requestAmount)
+      .approve(requestsContractAddress, amount)
       .send({ from: kit.defaultAccount });
   }
 
-  async function grantRequest(requestId, requestAmount) {
+  async function grantRequest(requestId, _requestAmount) {
     try {
-      await approveRequestAmount(requestAmount);
+      await approveRequestAmount(_requestAmount);
       await requestsContract.methods.completeRequest(requestId).send({ from: kit.defaultAccount })
+      fetchRequests()
     } catch (e) {
       console.log(e)
     }
@@ -465,8 +469,7 @@ const App = () => {
 
   useEffect(() => {
     if (requestsContract) {
-      getOutgoingRequests();
-      getIncomingRequest();
+      fetchRequests();
     }
   }, [requestsContract])
 
@@ -478,8 +481,8 @@ const App = () => {
           <div className='text-lg text-center underline'>Incoming Requests</div>
           {
             incomingRequests.map(r => (
-              <div className='bg-gray-200 mx-[10px] rounded-sm p-[5px]'>
-                <span className='text-xs font-mono'>{r.from}</span> is requesting for <span className='underline'>{r.amount}</span> cUSD
+              <div className='bg-gray-200 mx-[10px] rounded-sm p-[5px]' key={r.id}>
+                <span className='text-xs font-mono'>{r.from}</span> is requesting for <span className='underline'>{r.amount.shiftedBy(-ERC20_DECIMALS).toFixed(2)}</span> cUSD
                 {r.completed ? <div className='font-mono text-xs underline mt-[10px]'>Granted</div> : 
                 <input type={"button"} className="block bg-green-600 py-[5px] px-[15px] rounded-md mt-[15px] ml-[auto] mr-[5px] mb-[5px]" value="Grant" onClick={() => grantRequest(r.id, r.amount)} />}
                 </div>
@@ -488,7 +491,7 @@ const App = () => {
         </div>
         <div className='bg-green-200 w-[400px] rounded-md flex flex-col gap-[10px]'>
           <div className='text-lg text-center underline'>Make a request for cUSD</div>
-          <input type="number" onChange={e => setRequestAmount(e.target.value)} placeholder='How many cUSD are you requesting for?' className='text-sm p-[10px] m-[5px] m-[10px]' />
+          <input type="number" onChange={e => setRequestAmount(new BigNumber(e.target.value).shiftedBy(ERC20_DECIMALS).toString())} placeholder='How many cUSD are you requesting for?' className='text-sm p-[10px] m-[5px] m-[10px]' />
           <input type="text" onChange={e => setRequestReceiver(e.target.value)} placeholder='Who are you requesting cUSD from? (Enter wallet address)' className='text-sm p-[10px] m-[5px] m-[10px]' />
           <input type="button" value={"Send"} onClick={() => sendRequest()} className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm m-[10px]" />
         </div>
@@ -496,8 +499,8 @@ const App = () => {
           <div className='text-lg text-center underline'>Outgoing Requests</div>
           {
           outgoingRequests.map(r => (
-            <div className='bg-gray-200 mx-[10px] rounded-sm p-[5px] '>
-              You are requesting <span className='underline'>{r.amount}</span> cUSD from <span className='text-xs font-mono'>{r.from}</span>
+            <div className='bg-gray-200 mx-[10px] rounded-sm p-[5px] '  key={r.id}>
+              You are requesting <span className='underline'>{r.amount.shiftedBy(-ERC20_DECIMALS).toFixed(2)}</span> cUSD from <span className='text-xs font-mono'>{r.to}</span>
               <div className='font-mono text-xs underline mt-[10px]'>{r.completed? "Completed": "Pending..."}</div>
             </div>
           ))
@@ -513,15 +516,15 @@ export default App
 
 Follow along as we break down the code into simple and understandable snippets.
 
-We started by importing some of the packages we installed earlier to b eused inside this file. Some of them includes `Web3`, `BigNumber`, `newKitFromWeb3` etc.
+We first import some of the packages we installed earlier to be used inside this file. Some of them include `Web3`, `BigNumber`, `newKitFromWeb3` etc.
 
-We also created two variables that are very important to our application which are `cusdContractAddress` and `requestsContractAddress`.
+We also created two variables that are very important to our application which are `cUsdContractAddress` and `requestsContractAddress`.
 
-We then created a react app component called `App`. You can give your component any name of your choice, but we will just call ours because it tallies with the file name (by convention, components name are supposed to be the same as the file name).
+We then created a React app component called `App`. You can give your component any name of your choice, but we will just call ours because it tallies with the file name (by convention, components names are supposed to be the same as the file name).
 
-Inside the app component, we created some some state objects using `useState` provided by React. `useState` is React Hook that allows you to add state to a functional component. It returns an array with two values: the current state and a function to update it. The Hook takes an initial state value as an argument and returns an updated state value whenever the setter function is called.
+Inside the app component, we created some state objects using `useState` provided by React. `useState` is React Hook which allows you to add state to a functional component. It returns an array with two values: the current state and a function to update it. The hook takes an initial state value as an argument and returns an updated state value whenever the setter function is called.
 
-The usestate objects created in our app will be used to store some important states and variables in our application.
+The `useState` objects created in our app will be used to store some important states and variables in our application.
 
 ```javascript
   async function connectWallet() {
@@ -543,7 +546,7 @@ The usestate objects created in our app will be used to store some important sta
     }
   }
 ```
-We then created our first function and name it `connectWallet`. This function will be responsible for connecting our react application to the celo blockchain using the Celo Extension wallet installed in our browser. It also uses the Web3 library to make this connection possible. After everything is done, it saves them into the `kit` and `address` variable using their respective setter function which are `serKit` and `setAddress`.
+We then created our first function and name it `connectWallet`. This function will be responsible for connecting our React application to the Celo blockchain using the Celo Extension Wallet installed in our browser. It also uses the `Web3` library to make this connection possible. After everything is done, it saves them into the `kit` and `address` variables using their respective setter function which are `setKit` and `setAddress`.
 
 ```javascript
   async function connectContract() {
@@ -556,112 +559,117 @@ We then created our first function and name it `connectWallet`. This function wi
   }
 ```
 
-The next function we created is connctContract function. This function will be responsible for connecting our contract using the contract deployed address and teh ABI generated from the contract (we will discuss about coutractadddress, abi, etc leter). The function then saves the contract in our state object called `requestsContrac`t using the setter funciton called `setRequestContract`.
+The next function we created is the `connectContract()` function. This function will be responsible for connecting our contract using the contract deployed address and the ABI generated from the contract (we will discuss the requestsContractAddress, ABI, etc later). The function then saves the contract in our state object called `requestsContract` using the setter function called `setRequestContract`.
 
-The next series of functions we will be adding will be functions that adds functionalities to our dapp. The first one is `sendRequest` function. Below is the code fur the function:
+The next series of functions we will be adding will be functions that add functionalities to our dapp. The first one is the `sendRequest()` function. Below is the code fur the function:
 
 ```javascript
   async function sendRequest() {
+    const oneCusd = new BigNumber("1").shiftedBy(ERC20_DECIMALS).toString();
     try {
+      if(requestReceiver == kit.defaultAccount || requestReceiver == "0x0000000000000000000000000000000000000000"){
+        alert("Invalid receiver address");
+        return;
+      }
+      if(!new BigNumber(requestAmount).isGreaterThanOrEqualTo(oneCusd)){
+        alert("Request amount needs to be at least One cUSD");
+        return;
+      }
       await requestsContract.methods.makeRequest(requestReceiver, requestAmount).send({ from: kit.defaultAccount })
+      fetchRequests()
     } catch (error) {
       console.log(error)
     }
   }
 ```
-We made the function asyncronous by using the work `async` in front of the function. `async` means that we can use `await` inside the function.and when you use await, it means that you want to want for that particular expression fo complete execution before moving to the next expression. The function use the contract object we crated above to call the `makeRequest` method from the contracr and pass the necessary variables. 
+We made the function asynchronous by using the word `async` in front of the function. `async` means that we can use `await` inside the function and when you use await, it means that you want the function to wait for a pending `Promise` before continuing the function execution. The function uses the contract object we created above to call the `makeRequest` method from the contract and pass the necessary variables.
 
-The next functio is get incoming request.
+>**_Note:_** We carry out the same validation checks we are using on the smart contract which we have already covered in the [The Smart Contract](#the-smart-contract) section.
+
+The next function is the `fetchRequests()` function:
+
 ```javascript
-  async function getIncomingRequest() {
-    try {
-      const requests = await requestsContract.methods.loadIncomingRequests().call({ from: kit.defaultAccount })
-      const incomingRequests = await Promise.all(
-        requests.map(request => {
-          return {
-            id: request.requestId,
-            from: request.from,
-            to: request.to,
-            amount: request.amount,
-            completed: request.completed
-          }
+  async function fetchRequests(){
+    try{
+      const _requestsTracker = await requestsContract.methods.requestsTracker().call();
+      const _incomingRequests = [];
+      const _outgoingRequests = [];
+      let _requests = [];
+      for(let i = 0; i < Number(_requestsTracker); i++){
+        const _request = new Promise(async (resolve, reject) => {
+          const r = await requestsContract.methods.getRequest(i).call();
+          resolve({
+            id: r[0],
+            from: r[1],
+            to: r[2],
+            amount: new BigNumber(r[3]),
+            completed: r[4]
+          })
         })
-      );
-      setIncomingRequests(incomingRequests)
-    } catch (error) {
-      console.log(error)
+        _requests.push(_request);
+      }
+      _requests = await Promise.all(_requests);
+      _requests.forEach((r) => {
+        if(r.to == kit.defaultAccount){
+          _incomingRequests.push(r)
+        }else if(r.from == kit.defaultAccount){
+          _outgoingRequests.push(r)
+        }
+      })
+      setOutgoingRequests(_outgoingRequests);
+      setIncomingRequests(_incomingRequests);
+    }catch(e) {
+      console.log(e)
     }
   }
-```
-get incoming request is responsible for fetching all the incoming requests from the contract. These are requests that are sent to this user. The function calls the loadIncomingREquest from the funcition and uses a promise to collect the data object gotten from contract. At the end of the day, it then return the data and store it inside `incomingRequests` variable.
 
-The next function is get outgoing request:
+```
+
+The `fetchRequests()` function fetches all the requests created from our smart contract using a `for` loop and [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). After all requests have been fetched, we loop through them and only save incoming and outgoing requests made to the connected wallet address to the front-end state.
+
+Next, we will define the `approveRequestAmount()` and the `grantRequest()` functions:
 
 ```javascript
-  async function getOutgoingRequests() {
-    try {
-      const requests = await requestsContract.methods.loadOutgoingRequests().call({ from: kit.defaultAccount })
-      const outgoingRequests = await Promise.all(
-        requests.map(request => {
-          return {
-            id: request.requestId,
-            from: request.from,
-            to: request.to,
-            amount: request.amount,
-            completed: request.completed
-          }
-        })
-      );
-      setOutgoingRequests(outgoingRequests)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-```
-get outgoing request is responsible for fetching all the requests sent to this user an sstoring it to the `outGoingRequests` variable. 
-
-the last two functions we create are 
-
-```javascript
-  async function approveRequestAmount(amount) {    
-    const requestAmount = new BigNumber(amount).shiftedBy(18)
+  async function approveRequestAmount(amount) {  
     const cusdContract = new kit.web3.eth.Contract(
       erc20ABI,
       cUsdContractAddress
     );
     await cusdContract.methods
-      .approve(requestsContractAddress, requestAmount)
+      .approve(requestsContractAddress, amount)
       .send({ from: kit.defaultAccount });
   }
 
-  async function grantRequest(requestId, requestAmount) {
+  async function grantRequest(requestId, _requestAmount) {
     try {
-      await approveRequestAmount(requestAmount);
+      await approveRequestAmount(_requestAmount);
       await requestsContract.methods.completeRequest(requestId).send({ from: kit.defaultAccount })
+      fetchRequests()
     } catch (e) {
       console.log(e)
     }
   }
 ```
 
-approveRequestAmount() approves the our requests contract to spend the specific amount of cUSD from ouraccount using the erc20 approve method. It first gets the cusd contract before calling the approve method from it.
+The `approveRequestAmount()` function approves our smart contract to spend the request's amount from the connected account using the ERC20 's `approve()` method. It first creates an instance of the cUSD contract before calling the `approve()` method from it.
 
-grantRequest() completes a request that was sent to this user. It first of all calls the approveRequest function to approve the amount to be granted, before calling our request scontract to transfer the amount from this user's accout balance to the user making the request.
+The `grantRequest()` function completes a request that was sent to the connected user. It, first of all, calls the `approveRequest()` function to approve the amount to be granted, before calling our request contract to transfer the amount from the connected account's balance to the user making the request.
 
-Additionally, we added some use effect hook to update the the variables in the use state objects we created in the app componnent. use effect is similar to use state but the difference is that is is used to make dom updates when ever somehting happens in our app.
+Additionally, we added some `useEffect` hooks to update the variables in the use state objects we created in the `App` component. 
 
-In the last part of our app, we returned the user interface code that will be displayed when the user visits our app. We used tailwing to make it look better and add the functionalities to it by adding integerating the functions we just created above. There is nothing much in the page, it's just basic html with class names that contained tailwind styles. 
+In the last part of our app, we returned the user interface code that will be displayed when the user visits our app. We used Tailwind to make it look better and add functionalities to it by integrating the functions we just created above. There is nothing much on the page, it's just basic HTML with class names that contained tailwind styles. 
 
-Visit the [Tailwind documentation site](https://tailwindcss.com/docs/installation) to learn how to user tailwind if you are new to using it.
+Visit the [Tailwind documentation site](https://tailwindcss.com/docs/installation) to learn how to use tailwind if you are new to using it.
 
 
 
 ## Conclusion
-Now that you have a deployed contract iisntance, go to your terminal and run the command 
+Now that you have a deployed contract instance, go to your terminal and run the command 
+
 ```bash
 npm start
 ```
-It will open a window for you in your browser where you can interact with you newly amazing application.
+It will open a window for you in your browser where you can interact with your new amazing application.
 
 [This repository](https://github.com/buchifadev/requests-app) contains all the source codes used in this tutorial.
 
